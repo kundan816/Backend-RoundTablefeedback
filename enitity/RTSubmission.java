@@ -1,5 +1,6 @@
 package com.assignm4.RTFeedbackkkkk.enitity;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "feedback_forms")
-public class FeedbackForm {
+@Table(name = "rt_submissions")
+public class RTSubmission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,11 +22,11 @@ public class FeedbackForm {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    private String month;
-    private int year;
-    private int param1;
-    private int param2;
-    private int param3;
-    private String comments;
-}
+    @ManyToOne
+    @JoinColumn(name = "rtCycle_id", nullable = false)
+    private RTCycle rtCycle;
 
+    private double rating;
+    private String comments;
+    private boolean submitted;
+}

@@ -2,25 +2,25 @@ package com.assignm4.RTFeedbackkkkk.enitity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+@Builder
+@Entity
+@Table(name = "admin_overrides")
+public class AdminOverride {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;
-    private String password;
+    @OneToOne
+    @JoinColumn(name = "rtSubmission_id", nullable = false)
+    private RTSubmission rtSubmission;
 
-    @Enumerated(EnumType.STRING)
-    private UserRole role; // ADMIN, EMPLOYEE
-
-    @Enumerated(EnumType.STRING)
-    private BandLevel bandLevel; // B6, B7, B8
+    private double finalRating;
+    private String reason;
 }
