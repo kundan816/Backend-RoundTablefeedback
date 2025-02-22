@@ -28,5 +28,6 @@ public class Employee {
     private List<FeedbackForm> feedbackForms;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<RTFeedbackSubmission> rtFeedbackSubmissions;
 }
