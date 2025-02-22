@@ -5,8 +5,8 @@ import java.time.YearMonth;
 
 @Data
 public class FeedbackFormDTO {
-    private Long id;
-    private String employeeEmail;
+    private Long  id;
+    private String  employeeEmail;
     private YearMonth feedbackMonth;
     private String managerEmail;
     private String comments;
