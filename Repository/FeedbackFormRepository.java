@@ -9,8 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FeedbackFormRepository extends JpaRepository<FeedbackForm, Long> {
-    List<FeedbackForm> findByEmployeeAndFeedbackMonthBetween(
-            Employee employee, YearMonth startMonth, YearMonth endMonth);
+    List<FeedbackForm> findByEmployeeAndFeedbackMonthBetweenOrderByFeedbackMonthAsc(
+            Employee employee,
+            YearMonth startMonth,
+            YearMonth endMonth
+    );
     Optional<FeedbackForm> findByEmployeeAndFeedbackMonth(
             Employee employee, YearMonth feedbackMonth);
 }
