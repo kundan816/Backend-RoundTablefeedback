@@ -24,7 +24,7 @@ public class RTFeedbackSubmission {
 
     @ManyToOne
     @JoinColumn(name = "rt_cycle_id")
-    @JsonIgnore  // This prevents recursion by not including rtCycle in JSON response
+    @JsonIgnore  // This annotation prevents recursion by not including rtCycle in JSON response
     private RTCycle rtCycle;
 
 
