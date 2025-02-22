@@ -46,6 +46,7 @@ public class RTService {
                 .active(true)
                 .build();
 
+
         return rtCycleRepository.save(newCycle);
     }
 
@@ -164,6 +165,10 @@ public class RTService {
                 .calculatedGrade(grade)
                 .includedFeedbacks(cycleFeedbacks)
                 .build();
+        for (FeedbackForm feedback : cycleFeedbacks) {
+            feedback.setRtFeedbackSubmission(submission);
+        }
+
 
         return rtFeedbackSubmissionRepository.save(submission);
     }
@@ -230,7 +235,12 @@ public class RTService {
 
     public RTFeedbackSubmission getRTFeedback(Long id) {
         return rtFeedbackSubmissionRepository.findById(id)
+                .map(feedback -> {
+                    feedback.getIncludedFeedbacks().size(); // Forces Hibernate to load the list
+                    return feedback;
+                })
                 .orElseThrow(() -> new RuntimeException("RT Feedback submission not found"));
     }
+
 
 }

@@ -1,5 +1,6 @@
 package com.assignm4.RTFeedbackkkkk.enitity;
 import com.assignm4.RTFeedbackkkkk.utils.YearMonthConverter;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.YearMonth;
@@ -25,6 +26,6 @@ public class RTCycle {
     private boolean active;
 
     @OneToMany(mappedBy = "rtCycle", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<RTFeedbackSubmission> submissions = new ArrayList<>();
+    @JsonManagedReference  // Prevent infinite recursion
+    private List<RTFeedbackSubmission> submissions;
 }

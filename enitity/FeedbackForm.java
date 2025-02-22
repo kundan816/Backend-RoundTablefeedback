@@ -38,4 +38,8 @@ public class FeedbackForm {
 
     // B8 specific fields
     private Integer improvement;
+    @ManyToOne
+    @JsonBackReference  // Prevent recursion for RTFeedbackSubmission
+    @JoinColumn(name = "rt_feedback_submission_id")
+    private RTFeedbackSubmission rtFeedbackSubmission;
 }
