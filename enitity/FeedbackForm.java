@@ -1,31 +1,39 @@
 package com.assignm4.RTFeedbackkkkk.enitity;
 
+import lombok.*;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.YearMonth;
 
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "feedback_forms")
 public class FeedbackForm {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id", nullable = false)
+    @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    private String month;
-    private int year;
-    private int param1;
-    private int param2;
-    private int param3;
-    private String comments;
-}
+    private YearMonth feedbackMonth;
+    private String managerEmail;
 
+    // Common fields
+    private String comments;
+
+    // B6 specific fields
+    private Integer leadership;
+    private Integer orgContribution;
+    private Integer assistingPresales;
+
+    // B7 specific fields
+    private Integer timelyDelivery;
+    private Integer codeQuality;
+    private Integer clientCommunication;
+
+    // B8 specific fields
+    private Integer improvement;
+}

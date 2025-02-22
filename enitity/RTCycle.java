@@ -1,24 +1,24 @@
 package com.assignm4.RTFeedbackkkkk.enitity;
 
+import lombok.*;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.YearMonth;
+import java.util.List;
 
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "rt_cycles")
 public class RTCycle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String startMonth;
-    private int startYear;
-    private String endMonth;
-    private int endYear;
+    private YearMonth startMonth;
+    private YearMonth endMonth;
+    private boolean active;
+
+    @OneToMany(mappedBy = "rtCycle", cascade = CascadeType.ALL)
+    private List<RTFeedbackSubmission> submissions;
 }
