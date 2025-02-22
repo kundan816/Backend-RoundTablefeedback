@@ -1,5 +1,6 @@
 package com.assignm4.RTFeedbackkkkk.enitity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.YearMonth;
@@ -16,6 +17,7 @@ public class FeedbackForm {
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
+    @JsonBackReference
     private Employee employee;
 
     private YearMonth feedbackMonth;
