@@ -1,18 +1,26 @@
 package com.assignm4.RTFeedbackkkkk.DTO;
 
-import lombok.*;
+import lombok.Data;
+import java.time.YearMonth;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class FeedbackFormDTO {
     private Long id;
-    private Long employeeId;
-    private String month;
-    private int year;
-    private int param1;
-    private int param2;
-    private int param3;
+    private String employeeEmail;
+    private YearMonth feedbackMonth;
+    private String managerEmail;
     private String comments;
+
+    // B6 fields
+    private Integer leadership;
+    private Integer orgContribution;
+    private Integer assistingPresales;
+
+    // B7 fields
+    private Integer timelyDelivery;
+    private Integer codeQuality;
+    private Integer clientCommunication;
+
+    // B8 fields
+    private Integer improvement;
 }
