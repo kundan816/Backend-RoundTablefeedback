@@ -10,7 +10,7 @@ import com.assignm4.RTFeedbackkkkk.enitity.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import java.time.YearMonth;
+
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -201,16 +201,28 @@ public class RTService {
         return eligibleForms.size() >= requiredFeedbacks;
     }
 
-    public RTFeedbackSubmission adminUpdateRTFeedback(Long submissionId, Double overrideRating, String reason) {
+    public RTFeedbackSubmission adminUpdateRTFeedback(String adminEmail, Long submissionId, Double overrideRating, String reason) {
+        // Fetch the requesting admin
+        Employee admin = employeeRepository.findByEmail(adminEmail)
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+        // Check if the user has admin privileges
+        if (!admin.isAdmin()) {
+            throw new RuntimeException("Unauthorized: Only admins can update RT feedback.");
+        }
+
+        // Fetch the feedback submission
         RTFeedbackSubmission submission = rtFeedbackSubmissionRepository.findById(submissionId)
                 .orElseThrow(() -> new RuntimeException("RT Feedback submission not found"));
 
+        // Apply the override
         submission.setAdminOverrideRating(overrideRating);
         submission.setAdminOverrideGrade(calculateGrade(overrideRating));
         submission.setAdminReason(reason);
 
         return rtFeedbackSubmissionRepository.save(submission);
     }
+
 
     public List<RTFeedbackSubmission> getAllRTFeedbacks() {
         return rtFeedbackSubmissionRepository.findAll();

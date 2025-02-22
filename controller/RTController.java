@@ -22,10 +22,6 @@ public class RTController {
     private final RTService rtService;
     private final EmployeeRepository employeeRepository;
 
-//    @PostMapping("/cycle")
-//    public ResponseEntity<RTCycle> startRTCycle(@RequestBody RTCycleDTO cycleDTO) {
-//        return ResponseEntity.ok(rtService.startRTCycle(cycleDTO));
-//    }
 
     @PostMapping("/cycle")
     public ResponseEntity<String> startRTCycle(@RequestBody  RTCycleDTO cycleDTO, @RequestParam String email) {
@@ -45,6 +41,19 @@ public class RTController {
         return ResponseEntity.ok("RT cycle started successfully: " + rtCycle.getId());
     }
 
+    @GetMapping("/cycle")
+    public ResponseEntity<String> getActiveRTCycle() {
+        Optional<RTCycle> activeCycleOptional = rtService.getActiveCycle();
+
+        if (activeCycleOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No active RT cycle found.");
+        }
+
+        RTCycle activeCycle = activeCycleOptional.get();
+        return ResponseEntity.ok("Active RT cycle found with ID: " + activeCycle.getId());
+    }
+
 
     @PostMapping("/feedback")
     public ResponseEntity<RTFeedbackSubmission> submitRTFeedback(
@@ -54,12 +63,14 @@ public class RTController {
 
     @PutMapping("/feedback/{id}/admin-update")
     public ResponseEntity<RTFeedbackSubmission> adminUpdateRTFeedback(
+            @RequestHeader("adminEmail") String adminEmail,  // Get admin email from request header
             @PathVariable Long id,
             @RequestParam Double overrideRating,
             @RequestParam String reason) {
-        return ResponseEntity.ok(rtService.adminUpdateRTFeedback(id, overrideRating, reason));
-    }
 
+        RTFeedbackSubmission updatedFeedback = rtService.adminUpdateRTFeedback(adminEmail, id, overrideRating, reason);
+        return ResponseEntity.ok(updatedFeedback);
+    }
     @GetMapping("/feedback")
     public ResponseEntity<List<RTFeedbackSubmission>> getAllRTFeedbacks() {
         return ResponseEntity.ok(rtService.getAllRTFeedbacks());
