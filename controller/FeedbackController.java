@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/feedback")
@@ -24,25 +26,31 @@ public class FeedbackController {
     private final RTService rtService; // Renamed from RTCycleService to match your RTService
 
     @PostMapping
-    public ResponseEntity<String> submitFeedback(@RequestBody FeedbackFormDTO feedbackDTO) {
-        //  Fetch the active RT cycle safely
+    public ResponseEntity<Map<String, String>> submitFeedback(@RequestBody FeedbackFormDTO feedbackDTO) {
+        if (feedbackDTO.getFeedbackMonth() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Feedback month is required."));
+        }
+
         Optional<RTCycle> activeCycleOptional = rtService.getActiveCycle();
         if (activeCycleOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("RT cycle is not active. Cannot submit feedback.");
+                    .body(Map.of("message", "RT cycle is not active. Cannot submit feedback."));
         }
-        RTCycle activeCycle = activeCycleOptional.get();
 
-        //  Validate if the employee exists
         Optional<Employee> employeeOptional = employeeRepository.findByEmail(feedbackDTO.getEmployeeEmail());
         if (employeeOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Employee not found."));
         }
 
-        //  Submit feedback
         FeedbackForm feedback = feedbackService.submitFeedback(feedbackDTO);
-        return ResponseEntity.ok("Feedback submitted successfully with ID: " + feedback.getId());
+        return ResponseEntity.ok(Map.of(
+                "message", "Feedback submitted successfully",
+                "id", feedback.getId().toString()
+        ));
     }
+
 
     @GetMapping("/employee/{email}")
     public ResponseEntity<List<FeedbackForm>> getEmployeeFeedbacks(@PathVariable String email) {

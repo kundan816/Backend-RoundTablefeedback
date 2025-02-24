@@ -42,17 +42,11 @@ public class RTController {
     }
 
     @GetMapping("/cycle")
-    public ResponseEntity<String> getActiveRTCycle() {
-        Optional<RTCycle> activeCycleOptional = rtService.getActiveCycle();
-
-        if (activeCycleOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No active RT cycle found.");
-        }
-
-        RTCycle activeCycle = activeCycleOptional.get();
-        return ResponseEntity.ok("Active RT cycle found with ID: " + activeCycle.getId());
+    public ResponseEntity<List<RTCycle>> getAllRTCycles() {
+        List<RTCycle> cycles = rtService.getAllRTCycles();
+        return ResponseEntity.ok(cycles);
     }
+
 
 
     @PostMapping("/feedback")
@@ -63,14 +57,14 @@ public class RTController {
 
     @PutMapping("/feedback/{id}/admin-update")
     public ResponseEntity<RTFeedbackSubmission> adminUpdateRTFeedback(
-            @RequestHeader("adminEmail") String adminEmail,  // Get admin email from request header
+            @RequestHeader("adminEmail") String adminEmail,
             @PathVariable Long id,
             @RequestParam Double overrideRating,
             @RequestParam String reason) {
-
         RTFeedbackSubmission updatedFeedback = rtService.adminUpdateRTFeedback(adminEmail, id, overrideRating, reason);
         return ResponseEntity.ok(updatedFeedback);
     }
+
     @GetMapping("/feedback")
     public ResponseEntity<List<RTFeedbackSubmission>> getAllRTFeedbacks() {
         return ResponseEntity.ok(rtService.getAllRTFeedbacks());
@@ -80,4 +74,22 @@ public class RTController {
     public ResponseEntity<RTFeedbackSubmission> getRTFeedback(@PathVariable Long id) {
         return ResponseEntity.ok(rtService.getRTFeedback(id));
     }
+
+    @GetMapping("/feedback/eligibility")
+    public ResponseEntity<?> checkRTFeedbackEligibility(@RequestParam String email, @RequestParam Long cycleId) {
+        try {
+            boolean eligible = rtService.hasRequiredFeedbackCount(email, cycleId);
+            return ResponseEntity.ok(eligible);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/feedback/employee")
+    public ResponseEntity<List<RTFeedbackSubmission>> getEmployeeFeedback(@RequestParam String email) {
+        List<RTFeedbackSubmission> feedbacks = rtService.getCollatedFeedbackForEmployee(email);
+        return ResponseEntity.ok(feedbacks);
+    }
+
+
 }

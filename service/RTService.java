@@ -124,34 +124,31 @@ public class RTService {
                 .orElseThrow(() -> new RuntimeException("RT Cycle not found"));
 
         if (!cycle.isActive()) {
-            throw new RuntimeException("Cannot submit feedback for inactive RT cycle");
+            throw new RuntimeException("Cannot submit feedback for an inactive RT cycle.");
         }
 
         if (rtFeedbackSubmissionRepository.findByEmployeeIdAndRtCycleId(
                 employee.getId(), cycle.getId()).isPresent()) {
-            throw new RuntimeException("RT Feedback already submitted for this cycle");
+            throw new RuntimeException("You have already submitted RT feedback for this cycle.");
         }
 
+        // Get feedback forms
         List<FeedbackForm> cycleFeedbacks = feedbackFormRepository
                 .findByEmployeeAndFeedbackMonthBetweenOrderByFeedbackMonthAsc(
-                        employee,
-                        cycle.getStartMonth(),
-                        cycle.getEndMonth()
-                );
+                        employee, cycle.getStartMonth(), cycle.getEndMonth());
 
-        // Fixed monthsBetween calculation
         long monthsBetween = ChronoUnit.MONTHS.between(
                 cycle.getStartMonth(),
-                cycle.getEndMonth().plusMonths(1)  // Add 1 to include the end month
+                cycle.getEndMonth().plusMonths(1)
         );
 
         long requiredFeedbacks = (long) Math.ceil(monthsBetween * 0.75);
 
         if (cycleFeedbacks.size() < requiredFeedbacks) {
-            throw new RuntimeException(
-                    String.format("Insufficient feedback forms. Have %d, need at least %d forms to submit RT feedback",
-                            cycleFeedbacks.size(), requiredFeedbacks)
-            );
+            throw new RuntimeException(String.format(
+                    "You need %d feedback forms but have submitted only %d.",
+                    requiredFeedbacks, cycleFeedbacks.size()
+            ));
         }
 
         double rating = calculateRating(cycleFeedbacks, employee.getBandLevel());
@@ -165,13 +162,10 @@ public class RTService {
                 .calculatedGrade(grade)
                 .includedFeedbacks(cycleFeedbacks)
                 .build();
-        for (FeedbackForm feedback : cycleFeedbacks) {
-            feedback.setRtFeedbackSubmission(submission);
-        }
-
 
         return rtFeedbackSubmissionRepository.save(submission);
     }
+
     public List<FeedbackForm> getEligibleFeedbackForms(String email, Long cycleId) {
         Employee employee = employeeRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
@@ -191,20 +185,37 @@ public class RTService {
      * Checks if employee has sufficient feedback forms for RT submission
      */
     public boolean hasRequiredFeedbackCount(String email, Long cycleId) {
-        List<FeedbackForm> eligibleForms = getEligibleFeedbackForms(email, cycleId);
+        Employee employee = employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
         RTCycle cycle = rtCycleRepository.findById(cycleId)
                 .orElseThrow(() -> new RuntimeException("RT Cycle not found"));
 
-        // Fixed monthsBetween calculation
+        if (!cycle.isActive()) {
+            throw new RuntimeException("The RT cycle is inactive.");
+        }
+
+        // Get feedback forms submitted in the RT cycle
+        List<FeedbackForm> eligibleForms = feedbackFormRepository.findByEmployeeAndFeedbackMonthBetweenOrderByFeedbackMonthAsc(
+                employee, cycle.getStartMonth(), cycle.getEndMonth());
+
         long monthsBetween = ChronoUnit.MONTHS.between(
                 cycle.getStartMonth(),
-                cycle.getEndMonth().plusMonths(1)  // Add 1 to include the end month
+                cycle.getEndMonth().plusMonths(1)  // Include the last month
         );
 
         long requiredFeedbacks = (long) Math.ceil(monthsBetween * 0.75);
 
-        return eligibleForms.size() >= requiredFeedbacks;
+        if (eligibleForms.size() < requiredFeedbacks) {
+            throw new RuntimeException(String.format(
+                    "Insufficient feedback forms: You submitted %d, but at least %d are required.",
+                    eligibleForms.size(), requiredFeedbacks
+            ));
+        }
+
+        return true;
     }
+
 
     public RTFeedbackSubmission adminUpdateRTFeedback(String adminEmail, Long submissionId, Double overrideRating, String reason) {
         // Fetch the requesting admin
@@ -228,6 +239,10 @@ public class RTService {
         return rtFeedbackSubmissionRepository.save(submission);
     }
 
+    public List<RTCycle> getAllRTCycles() {
+        return rtCycleRepository.findAll();  // Get all cycles from DB
+    }
+
 
     public List<RTFeedbackSubmission> getAllRTFeedbacks() {
         return rtFeedbackSubmissionRepository.findAll();
@@ -240,6 +255,10 @@ public class RTService {
                     return feedback;
                 })
                 .orElseThrow(() -> new RuntimeException("RT Feedback submission not found"));
+    }
+
+    public List<RTFeedbackSubmission> getCollatedFeedbackForEmployee(String email) {
+        return rtFeedbackSubmissionRepository.findByEmployeeEmail(email);
     }
 
 
